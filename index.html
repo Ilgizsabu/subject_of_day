@@ -1,90 +1,20 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    .background-block__image {
-      width: 50%;
-      height: 50%;
-    }
-  </style>
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
   <div class="background-block">
-    <img class="background-block background-block__image" src="" alt="Тема дня">
+    <h1 class="word-of-day"></h1>
+    <img class="background-block__image">
+    <div class="spinner hidden"></div>
+    <div class="result-error"></div>
   </div>
-  <script>
-
-    const KEYWORDNIK = 'xr8j3yeo3ne90n7t3ogemkmnzi1rq3i3rtxqigblntcxdnfqv';
-
-    function subjectOfDay() {
-      fetch(`https://www.wordnik.com/word-of-the-day?${KEYWORDNIK}`)
-      .then(response => response.json())
-      console.log(response)
-      .then(word => {
-        let imagesData = word;
-        console.log(word);
-        let image = document.createElement('img');
-        image.src = `${imagesData.url}`;
-        userBlockImage.appendChild(image);
-      })
-      .catch((error) => {
-        resultError.textContent = error.message || 'Ошибка 404';
-      })
-    }
-
-    // const getUnsplashImage = function() {
-    //   fetch(`https://api.thecatapi.com/v1/breeds?${KEY}`)
-    //   .then(response => response.json())
-    //   .then(result => {
-    //     for (const results of result) {
-    //       const userResults = results["name"];
-    //       const option = document.createElement('option');
-    //       userBlockCatSelect.appendChild(option);
-    //       option.text = userResults;
-    //       option.value = results.reference_image_id;
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     resultError.textContent = error.message || 'Ошибка 404';
-    //   })
-    // }
-
-    subjectOfDay();
-  </script>
+  <script src="./index.js"></script>
 </body>
 </html>
-
-<!-- <script>
-  const userBlockCatSelect = document.querySelector('.user-block_breed-select');
-  const userBlockButton = document.querySelector('.user-block_button');
-  const userBlockLoader = document.querySelector('.user-block_loader');
-  const userBlockImage = document.querySelector('.user-block_image');
-  const resultError = document.querySelector('.result_error');
-  
-  userBlockCatSelect.addEventListener('change', (event) => {
-    event.preventDefault();
-    userBlockImage.innerHTML = '';
-    userBlockLoader.classList.remove('hidden');
-    
-    const selectBreed = userBlockCatSelect.value;
-    
-    fetch(`https://api.thecatapi.com/v1/images/${selectBreed}`)
-      .then((response) => response.json())
-      .then((data) => {
-        let imagesData = data;
-        let image = document.createElement('img');
-        image.src = `${imagesData.url}`;
-        userBlockImage.appendChild(image);
-      })
-      .catch((error) => {
-        resultError.textContent = error.message || 'Ошибка 404';
-      })
-      .finally(() => {
-        userBlockLoader.classList.add('hidden');
-      })
-  }); -->
