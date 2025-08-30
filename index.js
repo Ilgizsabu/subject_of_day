@@ -1,76 +1,71 @@
 const KEYWORDNIK = 'xr8j3yeo3ne90n7t3ogemkmnzi1rq3i3rtxqigblntcxdnfqv';
 const KEYUNSPLASH = 'M4UGF0HCyXwM648EYwnrUPRHeEK-VvhQFWsHf-von-s';
 
-document.addEventListener("DOMContentLoaded", () => { 
+document.addEventListener("DOMContentLoaded", () => {
   const wordOfDay = document.querySelector('.word-of-day');
   const resultError = document.querySelector('.result-error');
   const spinner = document.querySelector('.spinner');
+  const bgrBlockImage = document.querySelector('.background-block__image');
 
-  function getWordOfTheDay() {
-    showSpinner();
-    fetch(`https://api.wordnik.com/v4/words.json/wordOfTheDay?api_key=${KEYWORDNIK}`)
-    .then(response => response.json())
-    .then(data => {
-      const query = data.word;
-      wordOfDay.textContent = data.word;
-      searchUnsplash(query);
-      hideSpinner();
-    })
-    .catch((error) => {
-      resultError.textContent = `Error fetching word of the day: ${error.message}`;
-      hideSpinner();
-    });
-  }
+  function showSpinner() { spinner.classList.remove('hidden'); }
+  function hideSpinner() { spinner.classList.add('hidden'); }
 
-  function searchUnsplash(query) {
-    showSpinner();
-    fetch(`https://api.unsplash.com/search/photos?query=${query}&orientation=landscape&per_page=20&client_id=${KEYUNSPLASH}`)
-      .then(response => response.json())
-      .then(data => {
-        const getFirstPicture = data.results;
-        console.log(getFirstPicture.length + ' results found for query: ' + query);
-        if (getFirstPicture.length > 0) {
-          const firstPictureUrl = getFirstPicture[0].urls.regular;
-          setBackground(firstPictureUrl);
-          hideSpinner();
-        } else {
-            getRandomUnsplash();
-        }
-      })
-      .catch((error) => {
-        resultError.textContent = `Error fetching images: ${error.message}`;
-        hideSpinner();
-      });
-  }
+  async function getWordOfTheDay() {
+    const response = await fetch(`https://api.wordnik.com/v4/words.json/wordOfTheDay?api_key=${KEYWORDNIK}`);
+    if(!response.ok) { throw new Error(`HTTP error! status: ${response.status} for getWordOfTheDay`); }
 
-  function getRandomUnsplash() {
-    showSpinner();
-    fetch(`https://api.unsplash.com/photos/random?orientation=landscape&client_id=${KEYUNSPLASH}`)
-      .then(response => response.json())
-      .then(data => {
-          const randomPicture = data.urls.regular;
-          setBackground(randomPicture);
-          hideSpinner();
-        }
-      )
-      .catch((error) => {
-        resultError.textContent = `Error fetching random image: ${error.message}`;
-        hideSpinner();
-      });
+    const dataWord = await response.json();
+    if(!dataWord.word) return null;
+
+    const word = dataWord.word;
+    return word;
+  };
+
+  async function getUnsplashByWord(word) {
+    const q = encodeURIComponent(word);
+
+    const response = await fetch(`https://api.unsplash.com/photos/random?orientation=landscape&query=${q}&client_id=${KEYUNSPLASH}`);
+    if(!response.ok) { throw new Error(`HTTP error! status: ${response.status} for getUnsplashByWord`); }
+
+    const dataImg = await response.json();
+    if(!dataImg) { throw new Error('No image found for getUnsplashByWord')};
+
+    const url = dataImg.urls.regular;
+    return url;
+  };
+
+  async function getRandomUnsplash(wordRandom) {
+    const q = encodeURIComponent(wordRandom);
+
+    const response = await fetch(`https://api.unsplash.com/photos/random?orientation=landscape&query=${q}&client_id=${KEYUNSPLASH}`);
+    if(!response.ok) { throw new Error(`HTTP error! status: ${response.status} for getRandomUnsplash`); }
+
+    const data = await response.json();
+    if(!data) { throw new Error('No image found for getRandomUnsplash')};
+
+    const url = data.urls.regular;
+    return url;
   }
 
   function setBackground(url) {
-    const backgroundBlockImage = document.querySelector('.background-block__image');
-    backgroundBlockImage.src = url;
-  }
+    if(!url) return;
+    bgrBlockImage.src = url;
+    bgrBlockImage.alt = 'Background image from Unsplash';
+  };
 
-  function showSpinner() {
-    spinner.classList.remove('hidden');
-  }
+  async function main() {
+    showSpinner();
+    try {
+      const word = await getWordOfTheDay();
+      const wordRandom = 'nature';
+      const img = word ? await getUnsplashByWord(word) : await getRandomUnsplash(wordRandom);
+      setBackground(img);
+    } catch (error) {
+      resultError.textContent = `Error fetching: ${error.message}`;
+    } finally {
+      hideSpinner();
+    }
+  };
 
-  function hideSpinner() {
-    spinner.classList.add('hidden');
-  }
-
-  getWordOfTheDay();
+  main();
 });
